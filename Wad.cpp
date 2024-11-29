@@ -188,6 +188,31 @@ int Wad::getContents(const string &path, char *buffer, int length, int offset=0)
     return -1;
 }
 
+int Wad::getDirectory(const string &path, vector<string> *directory) {
+    if (isContent(path)) {
+        return 0;
+    }
+    return -1;
+}
+
+void Wad::createDirectory(const string &path) {
+    cout << "Creating directory " << path << endl;
+}
+
+void Wad::createFile(const string &path) {
+    cout << "Creating file " << path << endl;
+}
+
+int Wad::writeToFile(const string &path, const char *buffer, int length, int offset) {
+    return -1;
+}
+
+
+
+
+
+
+
 
 
 

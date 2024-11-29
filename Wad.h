@@ -21,10 +21,10 @@ class Wad {
         bool isDirectory(const string &path);
         int getSize(const string &path);
         int getContents(const string &path, char *buffer, int length, int offset);
-        // int getDirectory(const string &path, vector<string> *directory);
-        // void createDirectory(const string &path);
-        // void createFile(const string &path);
-        // int writeToFile(const string &path, const char *buffer, int length, int offset = 0);
+        int getDirectory(const string &path, vector<string> *directory);
+        void createDirectory(const string &path);
+        void createFile(const string &path);
+        int writeToFile(const string &path, const char *buffer, int length, int offset = 0);
     private:
         Wad(const string &path);
         string Magic;
