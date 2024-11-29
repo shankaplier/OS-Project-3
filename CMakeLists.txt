@@ -3,7 +3,7 @@ project(Project_3)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(Project_3 main.cpp
-        Wad.cpp
-        Wad.h
+add_executable(Project_3 P3_LibraryTestSuite/libWad/main.cpp
+        P3_LibraryTestSuite/libWad/Wad.cpp
+        P3_LibraryTestSuite/libWad/Wad.h
 )
