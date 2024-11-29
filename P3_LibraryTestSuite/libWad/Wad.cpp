@@ -69,8 +69,10 @@ Wad::Wad(const string &path) {
 
         //Check if the name is the beginning namespace directory
         if (regex_search(nameString, startPattern)) {
-            directoryName += nameString.substr(0, nameString.find("_START"));
-            tree directoryObject = makeTree(directoryName, (int)elementOffset, (int)elementLength);
+            string file_name = nameString.substr(0, nameString.find("_START"));
+            directoryName += file_name;
+            tree directoryObject = makeTree(file_name, (int)elementOffset, (int)elementLength);
+            treeMap->find(treeStack->top())->second.children.push_back(directoryObject);
             treeMap->insert(pair<string, tree>(directoryName, directoryObject));
             treeStack->push(directoryName);
         }
@@ -81,8 +83,9 @@ Wad::Wad(const string &path) {
         //Check if the name is a map directory
         else if (regex_search(nameString, mapPattern)) {
             directoryName += nameString;
-            tree directoryObject = makeTree(directoryName, (int)elementOffset, (int)elementLength);
+            tree directoryObject = makeTree(nameString, (int)elementOffset, (int)elementLength);
             treeMap->insert(pair<string, tree>(directoryName, directoryObject));
+            treeMap->find(treeStack->top())->second.children.push_back(directoryObject);
             treeStack->push(directoryName);
             mapElementsLeft = 11;
             mapDirectory = true;
@@ -90,7 +93,8 @@ Wad::Wad(const string &path) {
         //Everything here is a content
         else if (regex_search(nameString, contentPattern)){
             directoryName += nameString;
-            tree directoryObject = makeTree(directoryName, (int)elementOffset, (int)elementLength);
+            tree directoryObject = makeTree(nameString, (int)elementOffset, (int)elementLength);
+            treeMap->find(treeStack->top())->second.children.push_back(directoryObject);
             treeMap->insert(pair<string, tree>(directoryName, directoryObject));
         }
 
@@ -121,9 +125,6 @@ struct Wad::tree Wad::makeTree(string name, int offset, int length) {
 }
 
 bool Wad::isContent(const string &path) {
-    // for (auto it = treeMap->begin(); it != treeMap->end(); it++) {
-    //     cout << it->first << endl;
-    // }
     vector<string> files = pathSeperator(path);
     string file = files[files.size() - 1];
     regex contentPattern("\\.[a-zA-Z0-9.]+$");
@@ -143,6 +144,7 @@ bool Wad::isContent(const string &path) {
 bool Wad::isDirectory(const string &path) {
     vector<string> files = pathSeperator(path);
     string file = files[files.size() - 1];
+
     regex contentPattern("\\.[a-zA-Z0-9.]+$");
     if (regex_search(file, contentPattern)) {
         return false;
@@ -158,21 +160,24 @@ bool Wad::isDirectory(const string &path) {
 }
 
 vector<string> Wad::pathSeperator(const string &path) {
+    string file = path;
+
     vector<string> result;
     int res = 0;
     int prev_num;
-    if (path.size() > 0) {
+    if (file.size() > 0) {
         prev_num = 1;
     }
     else {
      prev_num = 0;
     }
-    while ((res = path.find("/", prev_num)) !=
+    string name;
+    while ((res = file.find("/", prev_num)) !=
             string::npos) {
-        result.push_back(path.substr(prev_num, (res-prev_num) < 0 ? prev_num - res : res - prev_num));
+        result.push_back(file.substr(prev_num, (res-prev_num) < 0 ? prev_num - res : res - prev_num));
         prev_num = res+1;
     }
-    result.push_back(path.substr(prev_num, res));
+    result.push_back(file.substr(prev_num, res-10));
     return result;
 }
 
@@ -187,16 +192,33 @@ int Wad::getSize(const string &path) {
 int Wad::getContents(const string &path, char *buffer, int length, int offset) {
     if (isContent(path)) {
         tree pathObject = treeMap->find(path)->second;
-        file.seekg( (offset != 0) ? offset : pathObject.offset, ios::beg);
+        file.seekg( (offset != 0) ? pathObject.offset + offset : pathObject.offset, ios::beg);
         file.read(buffer, length);
+        if (offset > pathObject.length) {
+            return 0;
+        }
         return (length < pathObject.length) ? length : pathObject.length - offset;
+
     }
     return -1;
 }
 
 int Wad::getDirectory(const string &path, vector<string> *directory) {
-    if (isContent(path)) {
-        return 0;
+    string longfile = path;
+
+    if (!path.empty()) {
+        char lastChar = longfile[longfile.size() - 1];
+        if (lastChar == '/') {
+            longfile.pop_back();
+        }
+    }
+
+    if (isDirectory(longfile)) {
+        tree pathObject = treeMap->find(longfile)->second;
+        for (unsigned int i = 0; i < pathObject.children.size(); i++) {
+            directory->push_back(pathObject.children[i].name);
+        }
+        return pathObject.children.size();
     }
     return -1;
 }

@@ -4,18 +4,18 @@ using namespace std;
 
 int main()
 {
-    Wad* wadObject = Wad::loadWad("./P3_Files/sample1.WAD");
-    string testPath = "/E1M0/01.txt";
-    char expectedString[] = "He loves to sing\n";
-    char buffer[1024];
-    memset(buffer, 0, 1024);
+    Wad* wadObject = Wad::loadWad("./P3_Files/sample1.wad");
+    string testPath = "/E1M0/";
+    std::vector<std::string> testVector;
+    int ret = wadObject->getDirectory(testPath, &testVector);
 
-    int sizeOfFile = wadObject->getSize(testPath);
-    cout << sizeOfFile << endl;
+    cout << ret << endl;
 
-    int retValue = wadObject->getContents(testPath, buffer, sizeOfFile);
-    cout << retValue << endl;
+    for (int i = 0; i < testVector.size(); i++) {
+        cout << testVector[i] << endl;
+    }
 
-    cout << "Expected string: " << expectedString;
-    cout << "Returned string: " << buffer;
+
+
+
 }
