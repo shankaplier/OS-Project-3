@@ -178,6 +178,7 @@ vector<string> Wad::pathSeperator(const string &path) {
         prev_num = res+1;
     }
     result.push_back(file.substr(prev_num, res-10));
+    cout <<result[0] << endl;
     return result;
 }
 
@@ -208,7 +209,7 @@ int Wad::getDirectory(const string &path, vector<string> *directory) {
 
     if (!path.empty()) {
         char lastChar = longfile[longfile.size() - 1];
-        if (lastChar == '/') {
+        if (lastChar == '/' && longfile.size() > 1) {
             longfile.pop_back();
         }
     }

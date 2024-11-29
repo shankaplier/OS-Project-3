@@ -5,7 +5,7 @@ using namespace std;
 int main()
 {
     Wad* wadObject = Wad::loadWad("./P3_Files/sample1.wad");
-    string testPath = "/E1M0/";
+    string testPath = "/";
     std::vector<std::string> testVector;
     int ret = wadObject->getDirectory(testPath, &testVector);
 
@@ -14,8 +14,5 @@ int main()
     for (int i = 0; i < testVector.size(); i++) {
         cout << testVector[i] << endl;
     }
-
-
-
 
 }
