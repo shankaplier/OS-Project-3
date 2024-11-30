@@ -134,7 +134,7 @@ Wad::tree Wad::makeTree(string name, int offset, int length, string type) {
 bool Wad::isContent(const string &path) {
     vector<string> files = pathSeperator(path);
     string file = files[files.size() - 1];
-        if (treeMap->find(path) != treeMap->end() && treeMap->find(file)->second.type == "file") {
+        if (treeMap->find(path) != treeMap->end() && treeMap->find(path)->second.type == "file") {
             return true;
         }
         else {
