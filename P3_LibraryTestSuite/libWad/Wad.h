@@ -46,6 +46,7 @@ class Wad {
         uint32_t descriptorOffset;
         int endDescriptorFinder(const string &path);
         void descriptorAdder(int offset, string &name);
+        void fileAdder(int offset, string &name);
 
 
 

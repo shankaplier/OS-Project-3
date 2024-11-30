@@ -34,9 +34,9 @@ Wad::Wad(const string &path) {
     //Assigning the read magic value to a Magic attribute on Wad for the method getMagic
     Magic = magic;
 
-    // cout << Magic << endl;
-    // cout << "Number of descriptors: " << numberOfDescriptors << endl;
-    // cout << "Descriptor offset: " << descriptorOffset << endl;
+    cout << Magic << endl;
+    cout << "Number of descriptors: " << numberOfDescriptors << endl;
+    cout << "Descriptor offset: " << descriptorOffset << endl;
 
     bool mapDirectory = false;
     int mapElementsLeft = 0;
@@ -52,13 +52,13 @@ Wad::Wad(const string &path) {
         file.read(name, 8);
 
 
-        // cout << "element offset: " << elementOffset << endl;
-        // cout << "element length: " << elementLength << endl;
+        cout << "element offset: " << elementOffset << endl;
+        cout << "element length: " << elementLength << endl;
 
 
         string nameString = name;
 
-        // cout << nameString << endl;
+        cout << nameString << endl;
         string directoryName;
 
         if (treeStack->top() == "/") {
@@ -274,7 +274,44 @@ void Wad::createDirectory(const string &path) {
 }
 
 void Wad::createFile(const string &path) {
-    cout << "Creating file " << path << endl;
+    vector<string> files = pathSeperator(path);
+    string beforeDirectory = "/";
+    string beforeDirectoryName = "";
+    string newFile;
+    for (unsigned int i = 0; i < files.size(); i++) {
+        if (i < (files.size() - 1))
+        {
+            beforeDirectory += files[i];
+        }
+        else if (i == (files.size() - 1)){
+            newFile = files[i];
+        }
+    }
+
+    regex mapPattern("E\\dM\\d$");
+    regex startPattern("_START$");
+    regex endPattern("_END$");
+    regex contentPattern("\\.[a-zA-Z0-9.]+$");
+    auto it = treeMap->find(beforeDirectory);
+    if (it != treeMap->end()) {
+        if (!(regex_search(beforeDirectory, mapPattern)) && !(regex_search(newFile, mapPattern)) && !(regex_search(newFile, startPattern)) && !(regex_search(newFile, endPattern)) && (regex_search(newFile, contentPattern)) && newFile.size() <= 8)
+        {
+            int position = endDescriptorFinder(beforeDirectory);
+            fileAdder(position, newFile);
+            tree newPathObject = tree();
+            newPathObject.name = newFile;
+            newPathObject.length = 0;
+            newPathObject.offset = 0;
+            if (beforeDirectory == "/") {
+                treeMap->insert(pair<string, tree>(beforeDirectory + newFile, newPathObject));
+                treeMap->find("/")->second.children.push_back(newPathObject);
+            }
+            else {
+                treeMap->insert(pair<string, tree>(beforeDirectory + "/" + newFile, newPathObject));
+                treeMap->find(beforeDirectory)->second.children.push_back(newPathObject);
+            }
+        }
+    }
 }
 
 int Wad::writeToFile(const string &path, const char *buffer, int length, int offset) {
@@ -427,6 +464,105 @@ void Wad::descriptorAdder(int offset, string &name) {
         // file.close();
 
     }
+
+}
+
+void Wad::fileAdder(int offset, string &name) {
+    //check if the offset is same as the end of the file
+    numberOfDescriptors += 1;
+    file.open(filePath, ios_base::in | ios_base::binary | ios_base::out | ios::ate);
+    streamsize fileSize = file.tellg();
+    file.close();
+    if (offset == fileSize) {
+        file.open(filePath, ios_base::binary | ios_base::app | ios_base::out);
+        file.seekp(0, ios_base::end);
+        int offset = 0;
+        int position = 0;
+        const size_t bufferSize = 8;
+        char nameBuffer[bufferSize];
+
+        memset(nameBuffer, 0, bufferSize);
+        memcpy(nameBuffer, name.c_str(), min(name.size(), bufferSize));
+        file.write(reinterpret_cast<char *>(&offset), sizeof(offset));
+        file.write(reinterpret_cast<char *>(&position), sizeof(position));
+        file.write(nameBuffer, bufferSize);
+        file.close();
+
+        file.open(filePath, ios_base::in | ios_base::binary | ios_base::out);
+        file.seekg(0, ios_base::end);
+        streamsize newFileSize = file.tellg();
+        file.seekg(0, ios_base::beg);
+        vector<char> magicBytes(4);
+        file.read(magicBytes.data(), 4);
+        vector<char> dummy(4);
+        file.read(dummy.data(), 4);
+        vector<char> everythingElseBytes(newFileSize-8);
+        file.read(everythingElseBytes.data(), newFileSize-8);
+        file.close();
+
+
+        file.open(filePath, ios_base::binary | ios_base::out | ios::trunc);
+        file.write(magicBytes.data(), magicBytes.size());
+        file.write(reinterpret_cast<char *>(&numberOfDescriptors), dummy.size());
+        file.write(everythingElseBytes.data(), everythingElseBytes.size());
+        file.close();
+
+    }
+    else {
+        file.open(filePath, ios_base::in | ios_base::binary | ios_base::out);
+        file.seekg(0, ios_base::beg);
+
+        vector<char> magicBytes(4);
+        file.read(magicBytes.data(), 4);
+        vector<char> dummy(4);
+        file.read(dummy.data(), 4);
+        vector<char> firstPartBuffer(offset-8);
+        file.read(firstPartBuffer.data(), offset);
+        vector<char> secondPartBuffer(fileSize - offset);
+        file.read(secondPartBuffer.data(), fileSize - offset);
+
+
+        file.close();
+
+        file.open(filePath, ios::trunc | ios::binary | ios::out);
+        file.seekp(0, ios_base::beg);
+        file.write(magicBytes.data(), magicBytes.size());
+        file.write(reinterpret_cast<char *>(&numberOfDescriptors), dummy.size());
+        file.write(firstPartBuffer.data(), firstPartBuffer.size());
+
+        int offset1 = 0;
+        int position = 0;
+        const size_t bufferSize = 8;
+        char nameBuffer[bufferSize];
+
+        memset(nameBuffer, 0, bufferSize);
+        memcpy(nameBuffer, name.c_str(), min(name.size(), bufferSize));
+        file.write(reinterpret_cast<char *>(&offset1), sizeof(offset1));
+        file.write(reinterpret_cast<char *>(&position), sizeof(position));
+        file.write(nameBuffer, bufferSize);
+
+        file.write(secondPartBuffer.data(), secondPartBuffer.size());
+        file.close();
+    }
+
+    // file.open(filePath, ios_base::in | ios_base::binary | ios_base::out);
+    // file.seekg(descriptorOffset, ios_base::beg);
+    // uint32_t testelementOffset;
+    // uint32_t testelementLength;
+    // char testname[9];
+    //
+    // for (int i = 0; i < numberOfDescriptors; i++) {
+    //     file.read((char*)&testelementOffset, 4);
+    //     file.read((char*)&testelementLength, 4);
+    //     file.read(testname, 8);
+    //     string nameString = testname;
+    //
+    //     cout << "element offset: " << testelementOffset << endl;
+    //     cout << "element length: " << testelementLength << endl;
+    //     cout << "name: " << nameString << endl;
+    // }
+    // file.close();
+
 
 }
 

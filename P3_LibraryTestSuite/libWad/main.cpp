@@ -5,20 +5,22 @@ using namespace std;
 int main()
 {
     Wad* wadObject = Wad::loadWad("./P3_Files/sample1.wad");
-    string testPath = "/Gl/ex/";
+    string testPath = "/file.txt";
 
-    wadObject->createDirectory(testPath);
-    cout << "isDirectory: " << wadObject->isDirectory(testPath) << endl;
-    cout << "isContent: " << wadObject->isContent(testPath) << endl;
+    wadObject->createFile(testPath);
+    cout << "is content: " << wadObject->isContent(testPath) << endl;
+    cout << "is directory: " << wadObject->isDirectory(testPath) << endl;
+
+    std::vector<std::string> testVector;
+    cout << "Returned from get directory: " << wadObject->getDirectory("/", &testVector) << endl;
+    cout << "Test vector size: " << testVector.size() << endl;
 
     delete wadObject;
-    cout << "Wad object has been deleted" << endl;
-
+    cout << "Wad has been deleted." << endl;
     wadObject = Wad::loadWad("./P3_Files/sample1.wad");
 
-    cout << "isDirectory: " << wadObject->isDirectory(testPath) << endl;
-    cout << "isContent: " << wadObject->isContent(testPath) << endl;
-
+    cout << "is content: " << wadObject->isContent(testPath) << endl;
+    cout << "is directory: " << wadObject->isDirectory(testPath) << endl;
 
 
 }
