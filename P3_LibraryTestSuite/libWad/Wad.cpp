@@ -252,7 +252,7 @@ void Wad::createDirectory(const string &path) {
     regex mapPattern("E\\dM\\d$");
     auto it = treeMap->find(beforeDirectory);
     if (it != treeMap->end()) {
-        if (!(regex_search(beforeDirectory, mapPattern)))
+        if (!(regex_search(beforeDirectory, mapPattern)) && !(regex_search(newDirectory, mapPattern)) && newDirectory.size() <= 2)
         {
             int position = endDescriptorFinder(beforeDirectory);
             descriptorAdder(position, newDirectory);
