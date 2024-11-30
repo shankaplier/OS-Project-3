@@ -39,6 +39,13 @@ class Wad {
         stack<string>* treeStack;
         vector<string> pathSeperator(const string &path);
         fstream file;
+        string endDashRemover(string const &path);
+        string filePath;
+        char magic[5];
+        uint32_t numberOfDescriptors;
+        uint32_t descriptorOffset;
+        int endDescriptorFinder(const string &path);
+        void descriptorAdder(int offset, string &name);
 
 
 

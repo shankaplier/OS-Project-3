@@ -2,7 +2,6 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/P3_LibraryTestSuite/googletest" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/P3_LibraryTestSuite/test-workspace/googletest" vcs="Git" />
   </component>
 </project>
