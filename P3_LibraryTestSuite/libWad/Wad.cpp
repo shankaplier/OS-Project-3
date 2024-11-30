@@ -381,7 +381,11 @@ void Wad::descriptorAdder(int offset, string &name) {
         file.open(filePath, ios_base::in | ios_base::binary | ios_base::out);
         file.seekg(0, ios_base::beg);
 
-        vector<char> firstPartBuffer(offset);
+        vector<char> magicBytes(4);
+        file.read(magicBytes.data(), 4);
+        vector<char> dummy(4);
+        file.read(dummy.data(), 4);
+        vector<char> firstPartBuffer(offset-8);
         file.read(firstPartBuffer.data(), offset);
         vector<char> secondPartBuffer(fileSize - offset);
         file.read(secondPartBuffer.data(), fileSize - offset);
@@ -391,8 +395,9 @@ void Wad::descriptorAdder(int offset, string &name) {
 
         file.open(filePath, ios::trunc | ios::binary | ios::out);
         file.seekp(0, ios_base::beg);
+        file.write(magicBytes.data(), magicBytes.size());
+        file.write(reinterpret_cast<char *>(&numberOfDescriptors), dummy.size());
         file.write(firstPartBuffer.data(), firstPartBuffer.size());
-
 
         int offset1 = 0;
         int position = 0;
@@ -416,10 +421,10 @@ void Wad::descriptorAdder(int offset, string &name) {
         file.write(secondPartBuffer.data(), secondPartBuffer.size());
         file.close();
 
-        file.open(filePath, ios_base::binary | ios_base::out);
-        file.seekp(4, ios_base::beg);
-        file.write(reinterpret_cast<char *>(&numberOfDescriptors), 4);
-        file.close();
+        // file.open(filePath, ios_base::binary | ios_base::out);
+        // file.seekp(4, ios_base::beg);
+        // file.write(reinterpret_cast<char *>(&numberOfDescriptors), 4);
+        // file.close();
 
     }
 
