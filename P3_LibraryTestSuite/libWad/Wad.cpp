@@ -218,7 +218,9 @@ int Wad::getDirectory(const string &path, vector<string> *directory) {
 
     if (isDirectory(longfile)) {
         tree pathObject = treeMap->find(longfile)->second;
+        // cout << "The children names are: " << endl;
         for (unsigned int i = 0; i < pathObject.children.size(); i++) {
+            // cout << pathObject.children[i].name << endl;
             directory->push_back(pathObject.children[i].name);
         }
         return pathObject.children.size();
@@ -415,10 +417,9 @@ void Wad::descriptorAdder(int offset, string &name) {
         vector<char> dummy(4);
         file.read(dummy.data(), 4);
         vector<char> firstPartBuffer(offset-8);
-        file.read(firstPartBuffer.data(), offset);
+        file.read(firstPartBuffer.data(), offset-8);
         vector<char> secondPartBuffer(fileSize - offset);
         file.read(secondPartBuffer.data(), fileSize - offset);
-
 
         file.close();
 
@@ -509,7 +510,7 @@ void Wad::fileAdder(int offset, string &name) {
         vector<char> dummy(4);
         file.read(dummy.data(), 4);
         vector<char> firstPartBuffer(offset-8);
-        file.read(firstPartBuffer.data(), offset);
+        file.read(firstPartBuffer.data(), offset-8);
         vector<char> secondPartBuffer(fileSize - offset);
         file.read(secondPartBuffer.data(), fileSize - offset);
 
