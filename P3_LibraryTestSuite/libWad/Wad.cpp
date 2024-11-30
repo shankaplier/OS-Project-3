@@ -34,9 +34,9 @@ Wad::Wad(const string &path) {
     //Assigning the read magic value to a Magic attribute on Wad for the method getMagic
     Magic = magic;
 
-    cout << Magic << endl;
-    cout << "Number of descriptors: " << numberOfDescriptors << endl;
-    cout << "Descriptor offset: " << descriptorOffset << endl;
+    // cout << Magic << endl;
+    // cout << "Number of descriptors: " << numberOfDescriptors << endl;
+    // cout << "Descriptor offset: " << descriptorOffset << endl;
 
     bool mapDirectory = false;
     int mapElementsLeft = 0;
@@ -52,13 +52,13 @@ Wad::Wad(const string &path) {
         file.read(name, 8);
 
 
-        cout << "element offset: " << elementOffset << endl;
-        cout << "element length: " << elementLength << endl;
+        // cout << "element offset: " << elementOffset << endl;
+        // cout << "element length: " << elementLength << endl;
 
 
         string nameString = name;
 
-        cout << nameString << endl;
+        // cout << nameString << endl;
         string directoryName;
 
         if (treeStack->top() == "/") {
@@ -147,9 +147,9 @@ bool Wad::isContent(const string &path) {
 }
 
 bool Wad::isDirectory(const string &path) {
-    for (auto it = treeMap->begin(); it != treeMap->end(); it++) {
-        cout << it->first << endl;
-    }
+    // for (auto it = treeMap->begin(); it != treeMap->end(); it++) {
+    //     cout << it->first << endl;
+    // }
     string cleanPath = endDashRemover(path);
     vector<string> files = pathSeperator(path);
     string file = files[files.size() - 1];
