@@ -32,9 +32,10 @@ class Wad {
             string name;
             int offset;
             int length;
+            string type;
             vector<tree> children;
         };
-        tree makeTree(string name, int offset, int length);
+        tree makeTree(string name, int offset, int length, string type);
         map<string, tree>* treeMap;
         stack<string>* treeStack;
         vector<string> pathSeperator(const string &path);

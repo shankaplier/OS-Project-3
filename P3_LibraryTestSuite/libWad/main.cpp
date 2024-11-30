@@ -5,7 +5,7 @@ using namespace std;
 int main()
 {
     Wad* wadObject = Wad::loadWad("./P3_Files/sample1.wad");
-    string testPath = "/file.txt";
+    string testPath = "/Gl/ad/example";
 
     wadObject->createFile(testPath);
     cout << "is content: " << wadObject->isContent(testPath) << endl;

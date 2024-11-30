@@ -15,7 +15,7 @@ Wad::Wad(const string &path) {
     file.open(path, ios::in | ios::binary | ios::out);
 
     //Creating variables to hold various values for initializing the tree
-    tree root = makeTree("/", 0, 0);
+    tree root = makeTree("/", 0, 0, "directory");
     treeMap = new map<string, tree>;
     treeMap->insert(pair<string, tree>("/", root));
     treeStack = new stack<string>;
@@ -34,9 +34,9 @@ Wad::Wad(const string &path) {
     //Assigning the read magic value to a Magic attribute on Wad for the method getMagic
     Magic = magic;
 
-    cout << Magic << endl;
-    cout << "Number of descriptors: " << numberOfDescriptors << endl;
-    cout << "Descriptor offset: " << descriptorOffset << endl;
+    // cout << Magic << endl;
+    // cout << "Number of descriptors: " << numberOfDescriptors << endl;
+    // cout << "Descriptor offset: " << descriptorOffset << endl;
 
     bool mapDirectory = false;
     int mapElementsLeft = 0;
@@ -52,13 +52,13 @@ Wad::Wad(const string &path) {
         file.read(name, 8);
 
 
-        cout << "element offset: " << elementOffset << endl;
-        cout << "element length: " << elementLength << endl;
+        // cout << "element offset: " << elementOffset << endl;
+        // cout << "element length: " << elementLength << endl;
 
 
         string nameString = name;
 
-        cout << nameString << endl;
+        // cout << nameString << endl;
         string directoryName;
 
         if (treeStack->top() == "/") {
@@ -78,7 +78,7 @@ Wad::Wad(const string &path) {
         if (regex_search(nameString, startPattern)) {
             string file_name = nameString.substr(0, nameString.find("_START"));
             directoryName += file_name;
-            tree directoryObject = makeTree(file_name, (int)elementOffset, (int)elementLength);
+            tree directoryObject = makeTree(file_name, (int)elementOffset, (int)elementLength, "directory");
             treeMap->find(treeStack->top())->second.children.push_back(directoryObject);
             treeMap->insert(pair<string, tree>(directoryName, directoryObject));
             treeStack->push(directoryName);
@@ -90,7 +90,7 @@ Wad::Wad(const string &path) {
         //Check if the name is a map directory
         else if (regex_search(nameString, mapPattern)) {
             directoryName += nameString;
-            tree directoryObject = makeTree(nameString, (int)elementOffset, (int)elementLength);
+            tree directoryObject = makeTree(nameString, (int)elementOffset, (int)elementLength, "directory");
             treeMap->insert(pair<string, tree>(directoryName, directoryObject));
             treeMap->find(treeStack->top())->second.children.push_back(directoryObject);
             treeStack->push(directoryName);
@@ -98,9 +98,9 @@ Wad::Wad(const string &path) {
             mapDirectory = true;
         }
         //Everything here is a content
-        else if (regex_search(nameString, contentPattern)){
+        else {
             directoryName += nameString;
-            tree directoryObject = makeTree(nameString, (int)elementOffset, (int)elementLength);
+            tree directoryObject = makeTree(nameString, (int)elementOffset, (int)elementLength, "file");
             treeMap->find(treeStack->top())->second.children.push_back(directoryObject);
             treeMap->insert(pair<string, tree>(directoryName, directoryObject));
         }
@@ -121,26 +121,25 @@ string Wad::getMagic() {
     return Magic;
 }
 
-struct Wad::tree Wad::makeTree(string name, int offset, int length) {
-    Wad::tree treeObject;
+Wad::tree Wad::makeTree(string name, int offset, int length, string type) {
+    tree treeObject;
     treeObject.name = name;
     treeObject.offset = offset;
     treeObject.length = length;
+    treeObject.type = type;
     return treeObject;
 }
+
 
 bool Wad::isContent(const string &path) {
     vector<string> files = pathSeperator(path);
     string file = files[files.size() - 1];
-    regex contentPattern("\\.[a-zA-Z0-9.]+$");
-    if (regex_search(file, contentPattern)) {
-        if (treeMap->find(path) != treeMap->end()) {
+        if (treeMap->find(path) != treeMap->end() && treeMap->find(file)->second.type == "file") {
             return true;
         }
         else {
             return false;
         }
-    }
 
     return false;
 
@@ -154,18 +153,12 @@ bool Wad::isDirectory(const string &path) {
     vector<string> files = pathSeperator(path);
     string file = files[files.size() - 1];
 
-    regex contentPattern("\\.[a-zA-Z0-9.]+$");
-    if (regex_search(file, contentPattern)) {
-        return false;
-    }
-    else {
-        if (treeMap->find(cleanPath) != treeMap->end()) {
+        if (treeMap->find(cleanPath) != treeMap->end() && treeMap->find(file)->second.type == "directory") {
             return true;
         }
         else {
             return false;
         }
-    }
 }
 
 vector<string> Wad::pathSeperator(const string &path) {
@@ -242,13 +235,14 @@ void Wad::createDirectory(const string &path) {
     for (unsigned int i = 0; i < files.size(); i++) {
         if (i < (files.size() - 1))
         {
-            beforeDirectory += files[i];
+            beforeDirectory += files[i] + "/";
         }
         else if (i == (files.size() - 1)){
             newDirectory = files[i];
         }
     }
 
+    beforeDirectory = endDashRemover(beforeDirectory);
     regex mapPattern("E\\dM\\d$");
     auto it = treeMap->find(beforeDirectory);
     if (it != treeMap->end()) {
@@ -256,10 +250,7 @@ void Wad::createDirectory(const string &path) {
         {
             int position = endDescriptorFinder(beforeDirectory);
             descriptorAdder(position, newDirectory);
-            tree newPathObject = tree();
-            newPathObject.name = newDirectory;
-            newPathObject.length = 0;
-            newPathObject.offset = 0;
+            tree newPathObject = makeTree(newDirectory, 0, 0, "directory");
             if (beforeDirectory == "/") {
                 treeMap->insert(pair<string, tree>(beforeDirectory + newDirectory, newPathObject));
                 treeMap->find("/")->second.children.push_back(newPathObject);
@@ -281,27 +272,28 @@ void Wad::createFile(const string &path) {
     for (unsigned int i = 0; i < files.size(); i++) {
         if (i < (files.size() - 1))
         {
-            beforeDirectory += files[i];
+            beforeDirectory += files[i] + "/";
         }
         else if (i == (files.size() - 1)){
             newFile = files[i];
         }
     }
 
+    beforeDirectory = endDashRemover(beforeDirectory);
+    cout << "beforeDirectory: " << beforeDirectory << endl;
+    for (auto it = treeMap->begin(); it != treeMap->end(); it++) {
+        cout << it->first << endl;
+    }
     regex mapPattern("E\\dM\\d$");
     regex startPattern("_START$");
     regex endPattern("_END$");
-    regex contentPattern("\\.[a-zA-Z0-9.]+$");
     auto it = treeMap->find(beforeDirectory);
     if (it != treeMap->end()) {
-        if (!(regex_search(beforeDirectory, mapPattern)) && !(regex_search(newFile, mapPattern)) && !(regex_search(newFile, startPattern)) && !(regex_search(newFile, endPattern)) && (regex_search(newFile, contentPattern)) && newFile.size() <= 8)
+        if (!(regex_search(beforeDirectory, mapPattern)) && !(regex_search(newFile, mapPattern)) && !(regex_search(newFile, startPattern)) && !(regex_search(newFile, endPattern)) && newFile.size() <= 8)
         {
             int position = endDescriptorFinder(beforeDirectory);
             fileAdder(position, newFile);
-            tree newPathObject = tree();
-            newPathObject.name = newFile;
-            newPathObject.length = 0;
-            newPathObject.offset = 0;
+            tree newPathObject = makeTree(newFile, 0, 0, "file");
             if (beforeDirectory == "/") {
                 treeMap->insert(pair<string, tree>(beforeDirectory + newFile, newPathObject));
                 treeMap->find("/")->second.children.push_back(newPathObject);
