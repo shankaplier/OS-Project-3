@@ -26,12 +26,17 @@ Wad::Wad(const string &path) {
     file.read((char*)&numberOfDescriptors, 4);
     file.read((char*)&descriptorOffset, 4);
 
+
+
     //Changing the pointer of file to point to the start of descriptor
     file.seekg(descriptorOffset, ios::beg);
 
     //Assigning the read magic value to a Magic attribute on Wad for the method getMagic
     Magic = magic;
 
+    cout << Magic << endl;
+    cout << "Number of descriptors: " << numberOfDescriptors << endl;
+    cout << "Descriptor offset: " << descriptorOffset << endl;
 
     bool mapDirectory = false;
     int mapElementsLeft = 0;
@@ -46,7 +51,14 @@ Wad::Wad(const string &path) {
         file.read((char*)&elementLength, 4);
         file.read(name, 8);
 
+
+        cout << "element offset: " << elementOffset << endl;
+        cout << "element length: " << elementLength << endl;
+
+
         string nameString = name;
+
+        cout << nameString << endl;
         string directoryName;
 
         if (treeStack->top() == "/") {
@@ -135,9 +147,9 @@ bool Wad::isContent(const string &path) {
 }
 
 bool Wad::isDirectory(const string &path) {
-    // for (auto it = treeMap->begin(); it != treeMap->end(); it++) {
-    //     cout << it->first << endl;
-    // }
+    for (auto it = treeMap->begin(); it != treeMap->end(); it++) {
+        cout << it->first << endl;
+    }
     string cleanPath = endDashRemover(path);
     vector<string> files = pathSeperator(path);
     string file = files[files.size() - 1];
@@ -344,6 +356,26 @@ void Wad::descriptorAdder(int offset, string &name) {
         file.write(reinterpret_cast<char *>(&position), sizeof(position));
         file.write(endingBuffer, bufferSize);
         file.close();
+
+        file.open(filePath, ios_base::in | ios_base::binary | ios_base::out);
+        file.seekg(0, ios_base::end);
+        streamsize newFileSize = file.tellg();
+        file.seekg(0, ios_base::beg);
+        vector<char> magicBytes(4);
+        file.read(magicBytes.data(), 4);
+        vector<char> dummy(4);
+        file.read(dummy.data(), 4);
+        vector<char> everythingElseBytes(newFileSize-8);
+        file.read(everythingElseBytes.data(), newFileSize-8);
+        file.close();
+
+
+        file.open(filePath, ios_base::binary | ios_base::out | ios::trunc);
+        file.write(magicBytes.data(), magicBytes.size());
+        file.write(reinterpret_cast<char *>(&numberOfDescriptors), sizeof(dummy));
+        file.write(everythingElseBytes.data(), everythingElseBytes.size());
+        file.close();
+
     }
     else {
         file.open(filePath, ios_base::in | ios_base::binary | ios_base::out);
@@ -384,6 +416,10 @@ void Wad::descriptorAdder(int offset, string &name) {
         file.write(secondPartBuffer.data(), secondPartBuffer.size());
         file.close();
 
+        file.open(filePath, ios_base::binary | ios_base::out);
+        file.seekp(4, ios_base::beg);
+        file.write(reinterpret_cast<char *>(&numberOfDescriptors), 4);
+        file.close();
 
     }
 
