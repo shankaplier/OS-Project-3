@@ -372,7 +372,7 @@ void Wad::descriptorAdder(int offset, string &name) {
 
         file.open(filePath, ios_base::binary | ios_base::out | ios::trunc);
         file.write(magicBytes.data(), magicBytes.size());
-        file.write(reinterpret_cast<char *>(&numberOfDescriptors), sizeof(dummy));
+        file.write(reinterpret_cast<char *>(&numberOfDescriptors), dummy.size());
         file.write(everythingElseBytes.data(), everythingElseBytes.size());
         file.close();
 
