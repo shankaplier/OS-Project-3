@@ -149,6 +149,8 @@ bool Wad::isDirectory(const string &path) {
         return false;
     }
     else {
+        cout << path << endl;
+        cout << "The result is: " << (treeMap->find(path) != treeMap->end()) << endl;
         if (treeMap->find(path) != treeMap->end()) {
             return true;
         }
@@ -191,6 +193,7 @@ int Wad::getSize(const string &path) {
 
 int Wad::getContents(const string &path, char *buffer, int length, int offset) {
     if (isContent(path)) {
+        file.open(filePath);
         tree pathObject = treeMap->find(path)->second;
         file.seekg( (offset != 0) ? pathObject.offset + offset : pathObject.offset, ios::beg);
         file.read(buffer, length);
@@ -198,7 +201,7 @@ int Wad::getContents(const string &path, char *buffer, int length, int offset) {
             return 0;
         }
         return (length < pathObject.length) ? length : pathObject.length - offset;
-
+        file.close();
     }
     return -1;
 }
@@ -256,7 +259,13 @@ void Wad::createDirectory(const string &path) {
             newPathObject.name = newDirectory;
             newPathObject.length = 0;
             newPathObject.offset = 0;
-            treeMap->insert(pair<string, tree>(beforeDirectory + "/" + newDirectory, newPathObject));
+            if (beforeDirectory == "/") {
+                treeMap->insert(pair<string, tree>(beforeDirectory + newDirectory, newPathObject));
+            }
+            else {
+                treeMap->insert(pair<string, tree>(beforeDirectory + "/" + newDirectory, newPathObject));
+            }
+
         }
         for (auto it = treeMap->begin(); it != treeMap->end(); it++) {
             cout << it->first << endl;
