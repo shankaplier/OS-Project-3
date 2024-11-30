@@ -250,9 +250,11 @@ void Wad::createDirectory(const string &path) {
             newPathObject.offset = 0;
             if (beforeDirectory == "/") {
                 treeMap->insert(pair<string, tree>(beforeDirectory + newDirectory, newPathObject));
+                treeMap->find("/")->second.children.push_back(newPathObject);
             }
             else {
                 treeMap->insert(pair<string, tree>(beforeDirectory + "/" + newDirectory, newPathObject));
+                treeMap->find(beforeDirectory)->second.children.push_back(newPathObject);
             }
 
         }
