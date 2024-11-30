@@ -252,7 +252,15 @@ void Wad::createDirectory(const string &path) {
             int position = endDescriptorFinder(beforeDirectory);
             // cout << "The position is: " << position << endl;
             descriptorAdder(position, newDirectory);
+            tree newPathObject = tree();
+            newPathObject.name = newDirectory;
+            newPathObject.length = 0;
+            newPathObject.offset = 0;
+            treeMap->insert(pair<string, tree>(beforeDirectory + "/" + newDirectory, newPathObject));
         }
+        for (auto it = treeMap->begin(); it != treeMap->end(); it++) {
+            cout << it->first << endl;
+        };
         // else {
         //     cout << "false" << endl;
         // }
