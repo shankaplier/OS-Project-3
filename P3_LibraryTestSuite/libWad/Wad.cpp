@@ -32,9 +32,6 @@ Wad::Wad(const string &path) {
     //Assigning the read magic value to a Magic attribute on Wad for the method getMagic
     Magic = magic;
 
-    // cout << "Magic" << magic << endl;
-    // cout << "Number Of Descriptors" << numberOfDescriptors << endl;
-    // cout << "Descriptor Offset" << descriptorOffset << endl;
 
     bool mapDirectory = false;
     int mapElementsLeft = 0;
@@ -103,9 +100,6 @@ Wad::Wad(const string &path) {
                 treeStack->pop();
             }
         }
-        // cout << "element Offset: " << elementOffset << endl;
-        // cout << "element Length: " << elementLength << endl;
-        // cout << "name: " << name << endl;
 
     }
     file.close();
@@ -141,6 +135,10 @@ bool Wad::isContent(const string &path) {
 }
 
 bool Wad::isDirectory(const string &path) {
+    // for (auto it = treeMap->begin(); it != treeMap->end(); it++) {
+    //     cout << it->first << endl;
+    // }
+    string cleanPath = endDashRemover(path);
     vector<string> files = pathSeperator(path);
     string file = files[files.size() - 1];
 
@@ -149,9 +147,7 @@ bool Wad::isDirectory(const string &path) {
         return false;
     }
     else {
-        cout << path << endl;
-        cout << "The result is: " << (treeMap->find(path) != treeMap->end()) << endl;
-        if (treeMap->find(path) != treeMap->end()) {
+        if (treeMap->find(cleanPath) != treeMap->end()) {
             return true;
         }
         else {
@@ -179,7 +175,6 @@ vector<string> Wad::pathSeperator(const string &path) {
         prev_num = res+1;
     }
     result.push_back(file.substr(prev_num, res-10));
-    // cout <<result[0] << endl;
     return result;
 }
 
@@ -242,18 +237,12 @@ void Wad::createDirectory(const string &path) {
         }
     }
 
-    // for (auto it = treeMap->begin(); it != treeMap->end(); it++) {
-    //     cout << it->first << endl;
-    // }
-
     regex mapPattern("E\\dM\\d$");
-    // cout << "BeforeDirectory: " << beforeDirectory << endl;
     auto it = treeMap->find(beforeDirectory);
     if (it != treeMap->end()) {
         if (!(regex_search(beforeDirectory, mapPattern)))
         {
             int position = endDescriptorFinder(beforeDirectory);
-            // cout << "The position is: " << position << endl;
             descriptorAdder(position, newDirectory);
             tree newPathObject = tree();
             newPathObject.name = newDirectory;
@@ -267,19 +256,7 @@ void Wad::createDirectory(const string &path) {
             }
 
         }
-        for (auto it = treeMap->begin(); it != treeMap->end(); it++) {
-            cout << it->first << endl;
-        };
-        // else {
-        //     cout << "false" << endl;
-        // }
-
     }
-    // for (auto it = treeMap->begin(); it != treeMap->end(); it++) {
-    //     cout << it->first << endl;
-    // }
-
-    // cout << "newDirectory: " << newDirectory << endl;
 }
 
 void Wad::createFile(const string &path) {
@@ -317,7 +294,6 @@ int Wad::endDescriptorFinder(const string &path) {
     file.open(filePath, ios_base::in | ios_base::binary | ios_base::out);
     file.seekg(descriptorOffset, ios_base::beg);
 
-    // cout << "fileName: " << fileName << endl;
     for (int i = 0; i < numberOfDescriptors; i++) {
 
         char name[9];
@@ -342,16 +318,11 @@ void Wad::descriptorAdder(int offset, string &name) {
     //check if the offset is same as the end of the file
     numberOfDescriptors += 2;
     file.open(filePath, ios_base::in | ios_base::binary | ios_base::out | ios::ate);
-    // if (!file) {
-    //     cout << "File open error" << endl;
-    // }
     streamsize fileSize = file.tellg();
-    // cout << "The filesize is: " << fileSize << endl;
     file.close();
     if (offset == fileSize) {
         file.open(filePath, ios_base::binary | ios_base::app | ios_base::out);
         file.seekp(0, ios_base::end);
-        cout << "true" << endl;
         int offset = 0;
         int position = 0;
         const size_t bufferSize = 8;
@@ -378,14 +349,8 @@ void Wad::descriptorAdder(int offset, string &name) {
 
         vector<char> firstPartBuffer(offset);
         file.read(firstPartBuffer.data(), offset);
-        // for (unsigned int i = 0; i < offset; i++) {
-        //     cout << firstPartBuffer[i] << endl;
-        // }
         vector<char> secondPartBuffer(fileSize - offset);
         file.read(secondPartBuffer.data(), fileSize - offset);
-        // for (unsigned int i = 0; i < fileSize-offset; i++) {
-        //     cout << secondPartBuffer[i] << endl;
-        // }
 
 
         file.close();
@@ -405,7 +370,6 @@ void Wad::descriptorAdder(int offset, string &name) {
 
         memset(beginningBuffer, 0, bufferSize);
         memset(endingBuffer, 0, bufferSize);
-        // min(beginningName.size(), bufferSize)
         memcpy(beginningBuffer, beginningName.c_str(), bufferSize);
         memcpy(endingBuffer, endName.c_str(),  bufferSize);
         file.write(reinterpret_cast<char *>(&offset1), sizeof(offset1));
@@ -421,40 +385,8 @@ void Wad::descriptorAdder(int offset, string &name) {
 
     }
 
-    // file.open(filePath, ios_base::in | ios_base::binary | ios_base::out);
-    // file.seekg(descriptorOffset, ios_base::beg);
-    // for (int i = 0; i < numberOfDescriptors; i++) {
-    //     char name[9];
-    //     int num;
-    //
-    //     file.read((char*)&num, 4);
-    //     file.read((char*)&num, 4);
-    //     file.read(name, 8);
-    //
-    //     cout << num << endl;
-    //     cout << num << endl;
-    //     cout << "The name is: " << name << endl;
-    //
-    // }
-    // file.close();
-
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-// bool Wad::isContent(const string &path) {
-//
-// }
 
 
 
