@@ -153,7 +153,7 @@ bool Wad::isDirectory(const string &path) {
     vector<string> files = pathSeperator(path);
     string file = files[files.size() - 1];
 
-        if (treeMap->find(cleanPath) != treeMap->end() && treeMap->find(file)->second.type == "directory") {
+        if (treeMap->find(cleanPath) != treeMap->end() && treeMap->find(cleanPath)->second.type == "directory") {
             return true;
         }
         else {
