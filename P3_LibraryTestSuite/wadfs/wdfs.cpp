@@ -2,7 +2,6 @@
 // Created by Shashank Gutta on 12/1/24.
 //
 #define FUSE_USE_VERSION 26
-#include "wdfs.h"
 #include <fuse.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -71,7 +70,7 @@ int main(int argc, char* argv[]) {
     string wadPath = argv[argc-2];
 
     if (wadPath.at(0) != '/') {
-        wadPath = string(filesystem::current_path()) + "/" + wadPath;
+        wadPath = string(get_current_dir_name()) + "/" + wadPath;
     }
     Wad* myWad = Wad::loadWad(wadPath);
 
