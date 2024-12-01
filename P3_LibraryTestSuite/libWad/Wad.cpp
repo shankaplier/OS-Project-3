@@ -393,6 +393,7 @@ int Wad::writeToFile(const string &path, const char *buffer, int length, int off
         //Writing the descriptor things
         // cout << "calling endDFinder" << endl;
         int position = endDescriptorFinder(path);
+        // cout << "The path given to enDFinder is: " << path << endl;
         file.open(filePath, ios::in | ios::binary);
         file.seekg(0, std::ios::end);
         fileSize = file.tellg();
@@ -467,6 +468,7 @@ int Wad::endDescriptorFinder(const string &path) {
         //     cout << files[i] << endl;
         // }
         fileName = files[files.size() - 1];
+        // cout << fileName << endl;
     }
     else {
         file.open(filePath, ios_base::in | ios_base::binary | ios::ate);
@@ -499,12 +501,20 @@ int Wad::endDescriptorFinder(const string &path) {
 
                 string nameString = name;
                 // cout << nameString << endl;
-                if (nameString == files[index+1] + "_START" || nameString == files[index+1]) {
+                if (nameString == files[index+1] + "_START") {
                     int position = file.tellg();
                     file_position =  position; //16
                     // cout << "File " << files[index+1] << " found at position " << file_position << endl;
                     index += 1;
                     break;
+                }
+                else if (nameString == files[index+1]) {
+                    int position = file.tellg();
+                    file_position =  position- 16; //16
+                    // cout << "File " << files[index+1] << " found at position " << file_position << endl;
+                    index += 1;
+                    file.close();
+                    return file_position;
                 }
                 // cout << "The current posiiton is: " << file.tellg() << endl;
                 // cout << "The filesize is: " << fileSize << endl;
@@ -530,7 +540,7 @@ int Wad::endDescriptorFinder(const string &path) {
         if (nameString == files[index] + "_END" || nameString == files[index]) {
             int position = file.tellg();
             file_position =  position - 16; //16
-            // cout << "File " << files[index+1] << " found at position " << file_position << endl;
+            // cout << "File " << files[index] << " found at position " << file_position << endl;
             index += 1;
             break;
         }
