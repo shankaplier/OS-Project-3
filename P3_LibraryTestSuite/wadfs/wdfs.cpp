@@ -50,14 +50,12 @@ static int do_readdir(const char *path, void *buffer, fuse_fill_dir_t filler, of
     filler(buffer, ".", NULL, 0);
     filler(buffer, "..", NULL, 0);
 
-    if (strcmp( path, "/" ) == 0 ) {
         vector<string> directory;
         ((Wad*)fuse_get_context()->private_data)->getDirectory(path, &directory);
         for (int i = 0; i < directory.size(); i++) {
             filler(buffer, directory[i].c_str(), NULL, 0);
         }
-
-    }
+    
     return 0;
 
 }
@@ -68,8 +66,8 @@ static int do_read(const char *path, char *buffer, size_t size, off_t offset, st
 
 static struct fuse_operations operations = {
     .getattr = do_getattr,
+    .read    = do_read,
     .readdir = do_readdir,
-    .read    = do_read
 };
 
 int main(int argc, char* argv[]) {
