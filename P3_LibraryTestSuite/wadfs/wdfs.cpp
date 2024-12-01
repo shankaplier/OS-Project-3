@@ -1,7 +1,6 @@
 //
 // Created by Shashank Gutta on 12/1/24.
 //
-#define FUSE_USE_VERSION 26
 #include <fuse.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -57,8 +56,7 @@ static int do_read(const char *path, char *buffer, size_t size, off_t offset, st
 static struct fuse_operations operations = {
     .getattr = do_getattr,
     .readdir = do_readdir,
-    .read = do_read,
-
+    .read    = do_read
 };
 
 int main(int argc, char* argv[]) {
