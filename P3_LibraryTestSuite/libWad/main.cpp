@@ -25,9 +25,38 @@ int main()
     char buffer[100];
     memset(buffer, 0, 100);
     cout << "The result from getContents is: " << wadObject->getContents(testPath, buffer, expectedSizeOfFile) << endl;
-    cout << "The result of memcmp is: " << memcmp(buffer, expectedFileContents, expectedSizeOfFile) << endl;
+    cout << "The result of memcmp is: " << memcmp(buffer, expectedFileContents,  expectedSizeOfFile) << endl;
 
     cout << "The returned string is: " << buffer << endl;
+
+    delete wadObject;
+    cout << "The wad object has been deleted" << endl;
+
+    wadObject = Wad::loadWad("./P3_Files/sample1.wad");
+
+    cout << "The size of getSize is: " << wadObject->getSize(testPath) << endl;
+
+    memset(buffer, 0, 100);
+    cout << "The result from getContents is: " << wadObject->getContents(testPath, buffer, expectedSizeOfFile) << endl;
+    cout << "The result of memcmp is: " << memcmp(buffer, expectedFileContents,  expectedSizeOfFile) << endl;
+
+    for (size_t i = 0; i < 57; ++i) {
+        if (expectedFileContents[i] != buffer[i]) {
+            std::cerr << "Mismatch at byte " << i
+                      << ": expected " << +expectedFileContents[i]
+                      << ", got " << +buffer[i] << "\n";
+            break;
+        }
+    }
+
+    cout << "The result from writing is: " << wadObject->writeToFile(testPath, expectedFileContents, expectedSizeOfFile) << endl;
+    cout << "The size of getSize is: " << wadObject->getSize(testPath) << endl;
+
+    memset(buffer, 0, 100);
+    cout << "The result from getContents is: " << wadObject->getContents(testPath, buffer, expectedSizeOfFile) << endl;
+    cout << "The result of memcmp is: " << memcmp(buffer, expectedFileContents,  expectedSizeOfFile) << endl;
+
+    delete wadObject;
 
 
 

@@ -193,15 +193,15 @@ int Wad::getSize(const string &path) {
 
 int Wad::getContents(const string &path, char *buffer, int length, int offset) {
     if (isContent(path)) {
-        file.open(filePath);
         tree pathObject = treeMap->find(path)->second;
-        file.seekg( (offset != 0) ? pathObject.offset + offset : pathObject.offset, ios::beg);
-        file.read(buffer, length);
         if (offset > pathObject.length) {
             return 0;
         }
-        return (length < pathObject.length) ? length : pathObject.length - offset;
+        file.open(filePath);
+        file.seekg( (offset != 0) ? pathObject.offset + offset : pathObject.offset, ios::beg);
+        file.read(buffer, length);
         file.close();
+        return (length < pathObject.length) ? length : pathObject.length - offset;
     }
     return -1;
 }
@@ -406,7 +406,7 @@ int Wad::writeToFile(const string &path, const char *buffer, int length, int off
         filePartTwo = vector<char> (fileSize - (position + 8));
         file.read(filePartTwo.data(), fileSize - (position + 8));
         file.close();
-
+        offset = 12 + offset;
         file.open(filePath, ios::out | ios::binary | ios::trunc);
         file.seekp(0, std::ios::beg);
         file.write(filePartOne.data(), filePartOne.size());
@@ -434,12 +434,6 @@ int Wad::writeToFile(const string &path, const char *buffer, int length, int off
         //     cout << testing[i] << endl;
         // }
         // file.close();
-
-
-
-
-
-
 
         return length;
     }
@@ -490,6 +484,7 @@ int Wad::endDescriptorFinder(const string &path) {
             return position - 16; //16
         }
     }
+    file.close();
 }
 
 void Wad::descriptorAdder(int offset, string &name) {
