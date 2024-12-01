@@ -34,9 +34,9 @@ Wad::Wad(const string &path) {
     //Assigning the read magic value to a Magic attribute on Wad for the method getMagic
     Magic = magic;
 
-    cout << Magic << endl;
-    cout << "Number of descriptors: " << numberOfDescriptors << endl;
-    cout << "Descriptor offset: " << descriptorOffset << endl;
+    // cout << Magic << endl;
+    // cout << "Number of descriptors: " << numberOfDescriptors << endl;
+    // cout << "Descriptor offset: " << descriptorOffset << endl;
 
     bool mapDirectory = false;
     int mapElementsLeft = 0;
@@ -52,13 +52,13 @@ Wad::Wad(const string &path) {
         file.read(name, 8);
 
 
-        cout << "element offset: " << elementOffset << endl;
-        cout << "element length: " << elementLength << endl;
+        // cout << "element offset: " << elementOffset << endl;
+        // cout << "element length: " << elementLength << endl;
 
 
         string nameString = name;
 
-        cout << nameString << endl;
+        // cout << nameString << endl;
         string directoryName;
 
         if (treeStack->top() == "/") {
@@ -458,9 +458,9 @@ int Wad::endDescriptorFinder(const string &path) {
     if (path != "/") {
         files = pathSeperator(path);
         files.insert(files.begin(), "/");
-        for (unsigned int i = 0; i < files.size(); i++) {
-            cout << files[i] << endl;
-        }
+        // for (unsigned int i = 0; i < files.size(); i++) {
+        //     cout << files[i] << endl;
+        // }
         fileName = files[files.size() - 1];
     }
     else {
@@ -476,9 +476,15 @@ int Wad::endDescriptorFinder(const string &path) {
 
     int index = 0;
     int file_position = descriptorOffset;
-    while (index < files.size()) {
-            file.seekg(file_position, ios_base::beg);
-            while (file.tellg() <= fileSize) {
+
+    // cout << "Number of files to look through: " << files.size() << endl;
+    while (index < files.size()-1) {
+        // cout << "The array size is: " << files.size() << endl;
+        // cout << "Current Index: " << index << endl;
+        // cout << "Current File: " << files[index] << endl;
+        // cout << "Next file: " << files[index+1] << endl;
+        file.seekg(file_position, ios_base::beg);
+            while (file.tellg() < fileSize) {
                 char name[9];
 
 
@@ -486,18 +492,46 @@ int Wad::endDescriptorFinder(const string &path) {
                 file.read(name, 4);
                 file.read(name, 8);
 
-
                 string nameString = name;
-                if (nameString == files[index+1] + "_END" || nameString == files[index+1]) {
+                // cout << nameString << endl;
+                if (nameString == files[index+1] + "_START" || nameString == files[index+1]) {
                     int position = file.tellg();
-                    file.close();
-                    file_position =  position - 16; //16
+                    file_position =  position; //16
+                    // cout << "File " << files[index+1] << " found at position " << file_position << endl;
                     index += 1;
                     break;
                 }
+                // cout << "The current posiiton is: " << file.tellg() << endl;
+                // cout << "The filesize is: " << fileSize << endl;
+                // cout << "End of loop has been reached" << endl;
             }
-            return file_position;
+        break;
+        cout << "Loop has been exited" << endl;
     }
+    file.seekg(file_position, ios_base::beg);
+    while (file.tellg() < fileSize) {
+        char name[9];
+
+
+        file.read(name, 4);
+        file.read(name, 4);
+        file.read(name, 8);
+
+        string nameString = name;
+        // cout << nameString << endl;
+        if (nameString == files[index+1] + "_END" || nameString == files[index+1]) {
+            int position = file.tellg();
+            file_position =  position - 16; //16
+            // cout << "File " << files[index+1] << " found at position " << file_position << endl;
+            index += 1;
+            break;
+        }
+        // cout << "The current posiiton is: " << file.tellg() << endl;
+        // cout << "The filesize is: " << fileSize << endl;
+        // cout << "End of loop has been reached" << endl;
+    }
+
+
 
     file.close();
     return file_position;
