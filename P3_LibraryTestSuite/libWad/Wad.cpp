@@ -505,10 +505,13 @@ int Wad::endDescriptorFinder(const string &path) {
                 // cout << "The filesize is: " << fileSize << endl;
                 // cout << "End of loop has been reached" << endl;
             }
-        break;
         cout << "Loop has been exited" << endl;
     }
     file.seekg(file_position, ios_base::beg);
+    cout << "The array size is: " << files.size() << endl;
+    cout << "Current Index: " << index << endl;
+    cout << "Current File: " << files[index] << endl;
+    cout << "Next file: " << files[index+1] << endl;
     while (file.tellg() < fileSize) {
         char name[9];
 
@@ -519,7 +522,7 @@ int Wad::endDescriptorFinder(const string &path) {
 
         string nameString = name;
         // cout << nameString << endl;
-        if (nameString == files[index+1] + "_END" || nameString == files[index+1]) {
+        if (nameString == files[index] + "_END" || nameString == files[index]) {
             int position = file.tellg();
             file_position =  position - 16; //16
             // cout << "File " << files[index+1] << " found at position " << file_position << endl;
