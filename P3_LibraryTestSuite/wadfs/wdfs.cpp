@@ -13,22 +13,35 @@
 #include <filesystem>
 #include "../libWad/Wad.h"
 
+char dir_list[ 256 ][ 256 ];
+int curr_dir_idx = -1;
+
+char files_list[ 256 ][ 256 ];
+int curr_file_idx = -1;
+
+char files_content[ 256 ][ 256 ];
+int curr_file_content_idx = -1;
+
+
 static int do_getattr(const char *path, struct stat *st) {
     st->st_uid = getuid();
     st->st_gid = getgid();
     st->st_atime = time(NULL);
     st->st_mtime = time(NULL);
 
-    if ( strcmp( path, "/" ) == 0 )
+    if ( strcmp( path, "/" ) == 0 || ((Wad*)fuse_get_context()->private_data)->isDirectory(path) == 1)
     {
         st->st_mode = S_IFDIR | 0755;
         st->st_nlink = 2;
     }
-    else
+    else if (((Wad*)fuse_get_context()->private_data)->isContent(path) == 1)
     {
         st->st_mode = S_IFREG | 0644;
         st->st_nlink = 1;
         st->st_size = ((Wad*)fuse_get_context()->private_data)->getSize(path);
+    }
+    else {
+        return -ENOENT;
     }
     return 0;
 }
