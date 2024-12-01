@@ -61,6 +61,12 @@ build CMakeFiles/Project_3.dir/P3_LibraryTestSuite/libWad/Wad.cpp.o: CXX_COMPILE
   OBJECT_DIR = CMakeFiles/Project_3.dir
   OBJECT_FILE_DIR = CMakeFiles/Project_3.dir/P3_LibraryTestSuite/libWad
 
+build CMakeFiles/Project_3.dir/P3_LibraryTestSuite/wadfs/FuseDaemon.cpp.o: CXX_COMPILER__Project_3_unscanned_Debug /Users/shankaplier/Documents/university/Semester$ 5/COP4600/Project_3/OS-Project-3/P3_LibraryTestSuite/wadfs/FuseDaemon.cpp || cmake_object_order_depends_target_Project_3
+  DEP_FILE = CMakeFiles/Project_3.dir/P3_LibraryTestSuite/wadfs/FuseDaemon.cpp.o.d
+  FLAGS = -g -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX15.1.sdk -fcolor-diagnostics
+  OBJECT_DIR = CMakeFiles/Project_3.dir
+  OBJECT_FILE_DIR = CMakeFiles/Project_3.dir/P3_LibraryTestSuite/wadfs
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target Project_3
@@ -69,7 +75,7 @@ build CMakeFiles/Project_3.dir/P3_LibraryTestSuite/libWad/Wad.cpp.o: CXX_COMPILE
 #############################################
 # Link the executable Project_3
 
-build Project_3: CXX_EXECUTABLE_LINKER__Project_3_Debug CMakeFiles/Project_3.dir/P3_LibraryTestSuite/libWad/main.cpp.o CMakeFiles/Project_3.dir/P3_LibraryTestSuite/libWad/Wad.cpp.o
+build Project_3: CXX_EXECUTABLE_LINKER__Project_3_Debug CMakeFiles/Project_3.dir/P3_LibraryTestSuite/libWad/main.cpp.o CMakeFiles/Project_3.dir/P3_LibraryTestSuite/libWad/Wad.cpp.o CMakeFiles/Project_3.dir/P3_LibraryTestSuite/wadfs/FuseDaemon.cpp.o
   FLAGS = -g -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX15.1.sdk
   OBJECT_DIR = CMakeFiles/Project_3.dir
   POST_BUILD = :
