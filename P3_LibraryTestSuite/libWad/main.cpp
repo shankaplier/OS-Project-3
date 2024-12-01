@@ -5,38 +5,29 @@ using namespace std;
 int main()
 {
     Wad* wadObject = Wad::loadWad("./P3_Files/sample1.wad");
-    string testPath = "/Gl/ex";
+    string testPath = "/file.txt";
 
-    wadObject->createDirectory(testPath);
-    cout << "is content: " << wadObject->isContent(testPath) << endl;
-    cout << "is directory: " << wadObject->isDirectory(testPath) << endl;
+    wadObject->createFile(testPath);
+
+    cout << "isContent: " << wadObject->isContent(testPath) << endl;
+    cout << "isDirectory: " << wadObject->isDirectory(testPath) << endl;
 
     std::vector<std::string> testVector;
-    cout << "Returned from get directory: " << wadObject->getDirectory(testPath, &testVector) << endl;
-    cout << "Test vector size: " << testVector.size() << endl;
+    cout << "The result is: " << wadObject->getDirectory("/", &testVector) << endl;
+    cout << "The vector Size is: " << testVector.size() << endl;
 
-    testVector.clear();
-    cout << "Returned from get directory: " << wadObject->getDirectory("/Gl", &testVector) << endl;
-    cout << "Test vector size: " << testVector.size() << endl;
+    const char expectedFileContents[] = "Hello! This is a test to make sure I can write to files.\n";
+    int expectedSizeOfFile = 57;
 
+    cout << "The result from writing is: " << wadObject->writeToFile(testPath, expectedFileContents, expectedSizeOfFile) << endl;
+    cout << "The size of the written object is: " << wadObject->getSize(testPath) << endl;
 
-    delete wadObject;
-    cout << "Wad has been deleted." << endl;
-    wadObject = Wad::loadWad("./P3_Files/sample1.wad");
+    char buffer[100];
+    memset(buffer, 0, 100);
+    cout << "The result from getContents is: " << wadObject->getContents(testPath, buffer, expectedSizeOfFile) << endl;
+    cout << "The result of memcmp is: " << memcmp(buffer, expectedFileContents, expectedSizeOfFile) << endl;
 
-    testVector.clear();
-    cout << "Returned from get directory: " << wadObject->getDirectory(testPath, &testVector) << endl;
-    cout << "Test vector size: " << testVector.size() << endl;
-
-    testVector.clear();
-    cout << "Returned from get directory: " << wadObject->getDirectory("/Gl", &testVector) << endl;
-    cout << "Test vector size: " << testVector.size() << endl;
-
-
-
-
-    cout << "is content: " << wadObject->isContent(testPath) << endl;
-    cout << "is directory: " << wadObject->isDirectory(testPath) << endl;
+    cout << "The returned string is: " << buffer << endl;
 
 
 

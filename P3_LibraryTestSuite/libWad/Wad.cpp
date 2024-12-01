@@ -282,10 +282,10 @@ void Wad::createFile(const string &path) {
     }
 
     beforeDirectory = endDashRemover(beforeDirectory);
-    cout << "beforeDirectory: " << beforeDirectory << endl;
-    for (auto it = treeMap->begin(); it != treeMap->end(); it++) {
-        cout << it->first << endl;
-    }
+    // cout << "beforeDirectory: " << beforeDirectory << endl;
+    // for (auto it = treeMap->begin(); it != treeMap->end(); it++) {
+    //     cout << it->first << endl;
+    // }
     regex mapPattern("E\\dM\\d$");
     regex startPattern("_START$");
     regex endPattern("_END$");
@@ -309,7 +309,140 @@ void Wad::createFile(const string &path) {
 }
 
 int Wad::writeToFile(const string &path, const char *buffer, int length, int offset) {
-    return -1;
+    string cleanPath = endDashRemover(path);
+
+    if (isDirectory(path) || treeMap->find(path) == treeMap->end()) {
+        return -1;
+    }
+    else if (treeMap->find(path)->second.length != 0)
+    {
+        return 0;
+    }
+    else {
+        descriptorOffset += length;
+        // cout << descriptorOffset << endl;
+
+        //Write the new file first
+        file.open(filePath, std::ios::in | std::ios::binary);
+        file.seekg(0, std::ios::end);
+        streamsize fileSize = file.tellg();
+        file.seekg(0, std::ios::beg);
+        vector<char> filePartOne(12 + offset);
+        file.read(filePartOne.data(), 12 + offset);
+        vector<char> filePartTwo(fileSize - (12 + offset));
+        file.read(filePartTwo.data(), fileSize - (12 + offset));\
+        file.close();
+
+        file.open(filePath, std::ios::out | std::ios::binary | ios::trunc);
+        file.seekp(0, std::ios::beg);
+        file.write(filePartOne.data(), filePartOne.size());
+        file.write(buffer, length);
+        file.write(filePartTwo.data(), filePartTwo.size());
+        file.close();
+
+        // file.open(filePath, std::ios::in | std::ios::binary);
+        // vector<char> testing(57);
+        // file.seekg(12, std::ios::beg);
+        // file.read(testing.data(), 57);
+        // for (unsigned int i = 0; i < testing.size(); i++) {
+        //     cout << testing[i] << endl;
+        // }
+        // file.close();
+
+        treeMap->find(path)->second.length = length;
+        treeMap->find(path)->second.offset = 12 + offset;
+        // cout << treeMap->find(path)->second.offset << endl;
+
+        //Write the descriptor offset
+        file.open(filePath, ios::in | ios::binary);
+        file.seekg(0, std::ios::end);
+        fileSize = file.tellg();
+        file.seekg(0, std::ios::beg);
+        filePartOne = vector<char>(8);
+        file.read(filePartOne.data(), 8);
+        vector<char>dummy(4);
+        file.read(dummy.data(), 4);
+        filePartTwo = vector<char>(fileSize - 12);
+        file.read(filePartTwo.data(), fileSize - 12);
+        file.close();
+
+        file.open(filePath, ios::out | ios::binary | ios::trunc);
+        file.seekp(0, std::ios::beg);
+        file.write(filePartOne.data(), filePartOne.size());
+        file.write(reinterpret_cast<char * >(&descriptorOffset), dummy.size());
+        file.write(filePartTwo.data(), filePartTwo.size());
+        file.close();
+
+        // file.open(filePath, std::ios::in | std::ios::binary);
+        // vector<char> testing(57);
+        // file.seekg(12, std::ios::beg);
+        // file.read(testing.data(), 57);
+        // for (unsigned int i = 0; i < testing.size(); i++) {
+        //     cout << testing[i] << endl;
+        // }
+        // file.close();
+
+        //testing
+        // file.open(filePath, ios::in | ios::binary);
+        // file.seekg(8, std::ios::beg);
+        // int test;
+        // file.read(reinterpret_cast<char *>(&test), 4);
+        // cout << test << endl;
+        // file.close();
+
+        //Writing the descriptor things
+        int position = endDescriptorFinder(path);
+        file.open(filePath, ios::in | ios::binary);
+        file.seekg(0, std::ios::end);
+        fileSize = file.tellg();
+        file.seekg(0, std::ios::beg);
+        // cout << "The position is: " << position << endl;
+        filePartOne = vector<char> (position);
+        file.read(filePartOne.data(), position);
+        dummy = vector<char> (4);
+        file.read(dummy.data(), 4);
+        vector<char> dummy1 = vector<char> (4);
+        file.read(dummy1.data(), 4);
+        filePartTwo = vector<char> (fileSize - (position + 8));
+        file.read(filePartTwo.data(), fileSize - (position + 8));
+        file.close();
+
+        file.open(filePath, ios::out | ios::binary | ios::trunc);
+        file.seekp(0, std::ios::beg);
+        file.write(filePartOne.data(), filePartOne.size());
+        file.write(reinterpret_cast<char *>(&offset), dummy.size());
+        file.write(reinterpret_cast<char *>(&length), dummy.size());
+        file.write(filePartTwo.data(), filePartTwo.size());
+
+        file.close();
+
+        // file.open(filePath, ios::in | ios::binary);
+        // file.seekg(position, std::ios::beg);
+        // int test1;
+        // int test2;
+        // file.read(reinterpret_cast<char *>(&test1), 4);
+        // file.read(reinterpret_cast<char *>(&test2), 4);
+        // cout << "The printed test1 is: " << test1 << endl;
+        // cout << "The printed test2 is: " << test2 << endl;
+        // file.close();
+
+        // file.open(filePath, std::ios::in | std::ios::binary);
+        // vector<char> testing(57);
+        // file.seekg(12, std::ios::beg);
+        // file.read(testing.data(), 57);
+        // for (unsigned int i = 0; i < testing.size(); i++) {
+        //     cout << testing[i] << endl;
+        // }
+        // file.close();
+
+
+
+
+
+
+
+        return length;
+    }
 }
 
 string Wad::endDashRemover(string const &path) {
@@ -324,6 +457,7 @@ string Wad::endDashRemover(string const &path) {
     return longfile;
 }
 
+//Change its name
 int Wad::endDescriptorFinder(const string &path) {
     string fileName;
     if (path != "/") {
@@ -350,13 +484,12 @@ int Wad::endDescriptorFinder(const string &path) {
 
 
         string nameString = name;
-        if (nameString == fileName + "_END") {
+        if (nameString == fileName + "_END" || nameString == fileName) {
             int position = file.tellg();
             file.close();
             return position - 16; //16
         }
     }
-
 }
 
 void Wad::descriptorAdder(int offset, string &name) {
