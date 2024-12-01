@@ -4,7 +4,8 @@ using namespace std;
 
 int main()
 {
-    Wad* wadObject = Wad::loadWad("./P3_Files/sample1.wad");
+    string mainPath = "./P3_Files/sample1.wad";
+    Wad* wadObject = Wad::loadWad(mainPath);
     // string testPath = "/file.txt";
 
     // //Creating dir '/Ex'
@@ -169,149 +170,69 @@ int main()
     // delete wadObject;
 
 
-    //createFile Test 2, creating file in directory
-    std::string testPath = "/Gl/ad/example";
+    //writeToFile Test 1, creating and writing to a text file
+    std::string testPath = "/file.txt";
+
+    //testing file creation
 
     wadObject->createFile(testPath);
 
-    std::vector<std::string> testVector;
-    cout << "the result from getDirectory should 2, got: " << wadObject->getDirectory("/Gl/ad/", &testVector) << endl;
 
-    cout << "The result from isDirectory should be 0, got: " << wadObject->isDirectory(testPath) << endl;
     cout << "The result from isContent should be 1, got: " << wadObject->isContent(testPath) << endl;
+    cout << "The result from isContent should be 0, got: " << wadObject->isDirectory(testPath) << endl;
 
-    cout << "The vector size should 2, got: " << testVector.size() << endl;
+    std::vector<std::string> testVector;
+    cout << "The result from getDirectory should be 4, got: " << wadObject->getDirectory("/", &testVector) << endl;
+    cout << "The testvector,size must be 4, got: " << testVector.size() << endl;
 
     std::vector<std::string> expectedVector = {
-        "os",
-        "example"
-};
+            "E1M0",
+            "Gl",
+            "mp.txt",
+            "file.txt"
+    };
 
     for (int i = 0; i < testVector.size(); i++) {
         if (testVector[i] != expectedVector[i]) {
-            cout << "Error, expected :" << expectedVector[i] << ", got " << testVector[i] << endl;
-            break;
+            cout << "Error: expected" << expectedVector[i] << " but got" << testVector[i] << endl;
         }
     }
+
+    //testing file writing
+    const char expectedFileContents[] = "Hello! This is a test to make sure I can write to files.\n";
+    int expectedSizeOfFile = 57;
+
+    cout << "The result of writeToFile should be 57, got: " << wadObject->writeToFile(testPath, expectedFileContents, expectedSizeOfFile) << endl;
+    cout << "The result of getSize() should be 57, got: " << wadObject->getSize(testPath) << endl;
+
+    char buffer[100];
+    memset(buffer, 0, 100);
+    cout << "The result of getContents should be 57, got: " << wadObject->getContents(testPath, buffer, expectedSizeOfFile) << endl;
+    cout << "The result of memcmp should be 0, got: " << memcmp(buffer, expectedFileContents, expectedSizeOfFile) << endl;
 
     //Reinstantiating object and rerunning tests
     delete wadObject;
-    wadObject = Wad::loadWad("./P3_Files/sample1.wad");
 
-    cout << "The result from isDirectory should be 0, got: " << wadObject->isDirectory(testPath) << endl;
-    cout << "The result from isContent should be 1, got: " << wadObject->isContent(testPath) << endl;
+    cout << "The wad has been deleted" << endl;
 
-    testVector.clear();
-    cout << "the result from getDirectory should 2, got: " << wadObject->getDirectory("/Gl/ad/", &testVector) << endl;
-    cout << "The vector size should 2, got: " << testVector.size() << endl;
+    wadObject = Wad::loadWad(mainPath);
 
-    for (int i = 0; i < testVector.size(); i++) {
-        if (testVector[i] != expectedVector[i]) {
-            cout << "Error, expected :" << expectedVector[i] << ", got " << testVector[i] << endl;
-            break;
-        }
-    }
+    cout << "The result of getSize() should be 57, got: " << wadObject->getSize(testPath) << endl;
 
+    memset(buffer, 0, 100);
+    cout << "The result of getContents should be 57, got: " << wadObject->getContents(testPath, buffer, expectedSizeOfFile) << endl;
+    cout << "The result of memcmp should be 0, got: " << memcmp(buffer, expectedFileContents, expectedSizeOfFile) << endl;
+
+    //Attemping to write to the file again
+
+    cout << "The result of writeToFile should be 0, got: " << wadObject->writeToFile(testPath, expectedFileContents, expectedSizeOfFile) << endl;
+    cout << "The result of getSize() should be 57, got: " << wadObject->getSize(testPath) << endl;
+
+    memset(buffer, 0, 100);
+    cout << "The result of getContents should be 57, got: " << wadObject->getContents(testPath, buffer, expectedSizeOfFile) << endl;
+    cout << "The result of memcmp should be 0, got: " << memcmp(buffer, expectedFileContents, expectedSizeOfFile) << endl;
 
     delete wadObject;
 
-
-
-
-
-
-//     //createDirectory Test 3, create nested directories back to back
-//     std::string testPath = "/ex/";
-//     std::string testPath2 = "/ex/am/";
-//
-//     wadObject->createDirectory(testPath);
-//
-//     cout << "The result from isDirectory should be 1, got: " << wadObject->isDirectory(testPath) << endl;
-//     cout << "The result from isContent should be 0, got: " << wadObject->isContent(testPath) << endl;
-//
-//     std::vector<std::string> testVector;
-//     cout << "the result from getDirectory should 0, got: " << wadObject->getDirectory(testPath, &testVector) << endl;
-//     cout << "The vector size should 0, got: " << testVector.size() << endl;
-//
-//     testVector.clear();
-//     cout << "The result from getDirectory should be 4, got: " << wadObject->getDirectory("/", &testVector) << endl;
-//     cout << "The vector size should be 4, got: " << testVector.size() << endl;
-//
-//     std::vector<std::string> expectedVector = {
-//         "E1M0",
-//         "Gl",
-//         "mp.txt",
-//         "ex",
-// };
-//
-//     for (int i = 0; i < testVector.size(); i++) {
-//             if (testVector[i] != expectedVector[i]) {
-//                 cout << "Error, expected :" << expectedVector[i] << ", got " << testVector[i] << endl;
-//                 break;
-//             }
-//         }
-//
-//     wadObject->createDirectory(testPath2);
-//
-//     cout << "The result from isDirectory should be 1, got: " << wadObject->isDirectory(testPath2) << endl;
-//     cout << "The result from isContent should be 0, got: " << wadObject->isContent(testPath2) << endl;
-//
-//     testVector.clear();
-//     cout << "the result from getDirectory should 1, got: " << wadObject->getDirectory(testPath, &testVector) << endl;
-//     cout << "The vector size should 1, got: " << testVector.size() << endl;
-//
-//     expectedVector.clear();
-//     expectedVector = {
-//         "E1M0",
-//         "Gl",
-//         "mp.txt",
-//         "ex",
-// };
-//
-//     for (int i = 0; i < testVector.size(); i++) {
-//         if (testVector[i] != expectedVector[i]) {
-//             cout << "Error, expected :" << expectedVector[i] << ", got " << testVector[i] << endl;
-//             break;
-//         }
-//     }
-//
-//     testVector.clear();
-//     cout << "The result from getDirectory should be 0, got: " << wadObject->getDirectory(testPath2, &testVector) << endl;
-//     cout << "The vector size should be 0, got: " << testVector.size() << endl;
-//
-//
-//     //Deleting and reinitiating object
-//     delete wadObject;
-//     cout << "wadObject has been deleted" << endl;
-//     wadObject = Wad::loadWad("./P3_Files/sample1.wad");
-//
-//     cout << "The result from isDirectory should be 1, got: " << wadObject->isDirectory(testPath) << endl;
-//     cout << "The result from isContent should be 0, got: " << wadObject->isContent(testPath) << endl;
-//
-//     cout << "The result from isDirectory should be 1, got: " << wadObject->isDirectory(testPath2) << endl;
-//     cout << "The result from isContent should be 0, got: " << wadObject->isContent(testPath2) << endl;
-//
-//     testVector.clear();
-//     cout << "the result from getDirectory should 1, got: " << wadObject->getDirectory(testPath, &testVector) << endl;
-//     cout << "The vector size should 1, got: " << testVector.size() << endl;
-//
-//     expectedVector.clear();
-//     expectedVector = {
-//         "am"
-//     };
-//
-//     for (int i = 0; i < testVector.size(); i++) {
-//         if (testVector[i] != expectedVector[i]) {
-//             cout << "Error, expected :" << expectedVector[i] << ", got " << testVector[i] << endl;
-//             break;
-//         }
-//     }
-//
-//     testVector.clear();
-//     cout << "The result from getDirectory should be 0, got: " << wadObject->getDirectory(testPath2, &testVector) << endl;
-//     cout << "The vector size should be 0, got: " << testVector.size() << endl;
-//
-//     delete wadObject;
-//
 
 }

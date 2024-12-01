@@ -391,12 +391,17 @@ int Wad::writeToFile(const string &path, const char *buffer, int length, int off
         // file.close();
 
         //Writing the descriptor things
+        // cout << "calling endDFinder" << endl;
         int position = endDescriptorFinder(path);
         file.open(filePath, ios::in | ios::binary);
         file.seekg(0, std::ios::end);
         fileSize = file.tellg();
         file.seekg(0, std::ios::beg);
         // cout << "The position is: " << position << endl;
+        // cout << "The size is: " << fileSize << endl;
+        if (position == fileSize) {
+            position -= 16;
+        }
         filePartOne = vector<char> (position);
         file.read(filePartOne.data(), position);
         dummy = vector<char> (4);
@@ -505,13 +510,13 @@ int Wad::endDescriptorFinder(const string &path) {
                 // cout << "The filesize is: " << fileSize << endl;
                 // cout << "End of loop has been reached" << endl;
             }
-        cout << "Loop has been exited" << endl;
+        // cout << "Loop has been exited" << endl;
     }
     file.seekg(file_position, ios_base::beg);
-    cout << "The array size is: " << files.size() << endl;
-    cout << "Current Index: " << index << endl;
-    cout << "Current File: " << files[index] << endl;
-    cout << "Next file: " << files[index+1] << endl;
+    // cout << "The array size is: " << files.size() << endl;
+    // cout << "Current Index: " << index << endl;
+    // cout << "Current File: " << files[index] << endl;
+    // cout << "Next file: " << files[index+1] << endl;
     while (file.tellg() < fileSize) {
         char name[9];
 
@@ -538,24 +543,6 @@ int Wad::endDescriptorFinder(const string &path) {
 
     file.close();
     return file_position;
-    // for (int i = 0; i < numberOfDescriptors; i++) {
-    //
-    //     char name[9];
-    //
-    //
-    //     file.read(name, 4);
-    //     file.read(name, 4);
-    //     file.read(name, 8);
-    //
-    //
-    //     string nameString = name;
-    //     if (nameString == fileName + "_END" || nameString == fileName) {
-    //         int position = file.tellg();
-    //         file.close();
-    //         return position - 16; //16
-    //     }
-    // }
-    // file.close();
 }
 
 void Wad::descriptorAdder(int offset, string &name) {
