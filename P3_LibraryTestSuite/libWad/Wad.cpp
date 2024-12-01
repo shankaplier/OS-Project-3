@@ -34,9 +34,9 @@ Wad::Wad(const string &path) {
     //Assigning the read magic value to a Magic attribute on Wad for the method getMagic
     Magic = magic;
 
-    // cout << Magic << endl;
-    // cout << "Number of descriptors: " << numberOfDescriptors << endl;
-    // cout << "Descriptor offset: " << descriptorOffset << endl;
+    cout << Magic << endl;
+    cout << "Number of descriptors: " << numberOfDescriptors << endl;
+    cout << "Descriptor offset: " << descriptorOffset << endl;
 
     bool mapDirectory = false;
     int mapElementsLeft = 0;
@@ -52,13 +52,13 @@ Wad::Wad(const string &path) {
         file.read(name, 8);
 
 
-        // cout << "element offset: " << elementOffset << endl;
-        // cout << "element length: " << elementLength << endl;
+        cout << "element offset: " << elementOffset << endl;
+        cout << "element length: " << elementLength << endl;
 
 
         string nameString = name;
 
-        // cout << nameString << endl;
+        cout << nameString << endl;
         string directoryName;
 
         if (treeStack->top() == "/") {
@@ -454,8 +454,13 @@ string Wad::endDashRemover(string const &path) {
 //Change its name
 int Wad::endDescriptorFinder(const string &path) {
     string fileName;
+    vector<string> files;
     if (path != "/") {
-        vector<string> files = pathSeperator(path);
+        files = pathSeperator(path);
+        files.insert(files.begin(), "/");
+        for (unsigned int i = 0; i < files.size(); i++) {
+            cout << files[i] << endl;
+        }
         fileName = files[files.size() - 1];
     }
     else {
@@ -465,26 +470,55 @@ int Wad::endDescriptorFinder(const string &path) {
         return (int) fileSize;
     }
     file.open(filePath, ios_base::in | ios_base::binary | ios_base::out);
-    file.seekg(descriptorOffset, ios_base::beg);
-
-    for (int i = 0; i < numberOfDescriptors; i++) {
-
-        char name[9];
+    file.seekg(0, std::ios::end);
+    streamsize fileSize = file.tellg();
 
 
-        file.read(name, 4);
-        file.read(name, 4);
-        file.read(name, 8);
+    int index = 0;
+    int file_position = descriptorOffset;
+    while (index < files.size()) {
+            file.seekg(file_position, ios_base::beg);
+            while (file.tellg() <= fileSize) {
+                char name[9];
 
 
-        string nameString = name;
-        if (nameString == fileName + "_END" || nameString == fileName) {
-            int position = file.tellg();
-            file.close();
-            return position - 16; //16
-        }
+                file.read(name, 4);
+                file.read(name, 4);
+                file.read(name, 8);
+
+
+                string nameString = name;
+                if (nameString == files[index+1] + "_END" || nameString == files[index+1]) {
+                    int position = file.tellg();
+                    file.close();
+                    file_position =  position - 16; //16
+                    index += 1;
+                    break;
+                }
+            }
+            return file_position;
     }
+
     file.close();
+    return file_position;
+    // for (int i = 0; i < numberOfDescriptors; i++) {
+    //
+    //     char name[9];
+    //
+    //
+    //     file.read(name, 4);
+    //     file.read(name, 4);
+    //     file.read(name, 8);
+    //
+    //
+    //     string nameString = name;
+    //     if (nameString == fileName + "_END" || nameString == fileName) {
+    //         int position = file.tellg();
+    //         file.close();
+    //         return position - 16; //16
+    //     }
+    // }
+    // file.close();
 }
 
 void Wad::descriptorAdder(int offset, string &name) {
