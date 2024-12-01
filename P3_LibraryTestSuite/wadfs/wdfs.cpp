@@ -31,12 +31,13 @@ static int do_getattr(const char *path, struct stat *st) {
 
     if ( strcmp( path, "/" ) == 0 || ((Wad*)fuse_get_context()->private_data)->isDirectory(path) == 1)
     {
-        st->st_mode = S_IFDIR | 0755;
+        //Might have to change these
+        st->st_mode = S_IFDIR | 0777;
         st->st_nlink = 2;
     }
     else if (((Wad*)fuse_get_context()->private_data)->isContent(path) == 1)
     {
-        st->st_mode = S_IFREG | 0644;
+        st->st_mode = S_IFREG | 0777;
         st->st_nlink = 1;
         st->st_size = ((Wad*)fuse_get_context()->private_data)->getSize(path);
     }
@@ -55,19 +56,40 @@ static int do_readdir(const char *path, void *buffer, fuse_fill_dir_t filler, of
         for (int i = 0; i < directory.size(); i++) {
             filler(buffer, directory[i].c_str(), NULL, 0);
         }
-    
+
     return 0;
 
 }
 
 static int do_read(const char *path, char *buffer, size_t size, off_t offset, struct fuse_file_info *fi) {
-    return ((Wad*)fuse_get_context()->private_data)->getContents(path, buffer, size, offset);
+    if (((Wad*)fuse_get_context()->private_data)->isContent(path)) {
+        return ((Wad*)fuse_get_context()->private_data)->getContents(path, buffer, size, offset);
+    }
+    else {
+        return -1;
+    }
+}
+
+static int do_mkdir(const char *path, mode_t mode) {
+    ((Wad*)fuse_get_context()->private_data)->createDirectory(path);
+    return 0;
+}
+
+static int do_mknod(const char *path, mode_t mode, dev_t rdev) {
+    ((Wad*)fuse_get_context()->private_data)->createFile(path);
+}
+
+static int do_write(const char *path, const char *buffer, size_t size, off_t offset, struct fuse_file_info *info) {
+    return ((Wad*)fuse_get_context()->private_data)->writeToFile(path, buffer, size, offset);
 }
 
 static struct fuse_operations operations = {
     .getattr = do_getattr,
     .read    = do_read,
     .readdir = do_readdir,
+    .mkdir  = do_mkdir,
+    .mknod  = do_mknod,
+    .write  = do_write,
 };
 
 int main(int argc, char* argv[]) {
