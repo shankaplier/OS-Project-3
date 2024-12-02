@@ -33,7 +33,7 @@ Wad::Wad(const string &path) {
 
     //Assigning the read magic value to a Magic attribute on Wad for the method getMagic
     Magic = magic;
-    delete[] magic;
+
 
     char name[9];
     bool mapDirectory = false;
@@ -109,7 +109,7 @@ Wad::Wad(const string &path) {
         }
 
     }
-    delete[] name;
+
     file.close();
 }
 
@@ -517,8 +517,6 @@ void Wad::descriptorAdder(int offset, string &name) {
         file.write(everythingElseBytes.data(), everythingElseBytes.size());
         file.close();
 
-        delete[] beginningBuffer;
-        delete[] endingBuffer;
     }
     else {
         file.open(filePath, ios_base::in | ios_base::binary | ios_base::out);
@@ -562,9 +560,7 @@ void Wad::descriptorAdder(int offset, string &name) {
 
         file.write(secondPartBuffer.data(), secondPartBuffer.size());
         file.close();
-
-        delete[] beginningBuffer;
-        delete[] endingBuffer;
+        
 
     }
 
@@ -610,7 +606,6 @@ void Wad::fileAdder(int offset, string &name) {
         file.write(everythingElseBytes.data(), everythingElseBytes.size());
         file.close();
 
-        delete[] nameBuffer;
     }
     else {
         file.open(filePath, ios_base::in | ios_base::binary | ios_base::out);
@@ -648,7 +643,6 @@ void Wad::fileAdder(int offset, string &name) {
         file.write(secondPartBuffer.data(), secondPartBuffer.size());
         file.close();
 
-        delete[] nameBuffer;
     }
 }
 
