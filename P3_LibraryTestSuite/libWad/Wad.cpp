@@ -372,7 +372,7 @@ int Wad::writeToFile(const string &path, const char *buffer, int length, int off
         filePartTwo = vector<char> (fileSize - (position + 8));
         file.read(filePartTwo.data(), fileSize - (position + 8));
         file.close();
-        offset = 12 + offset;
+        offset = treeMap->find(path)->second.offset;
         file.open(filePath, ios::out | ios::binary | ios::trunc);
         file.seekp(0, std::ios::beg);
         file.write(filePartOne.data(), filePartOne.size());
@@ -560,7 +560,7 @@ void Wad::descriptorAdder(int offset, string &name) {
 
         file.write(secondPartBuffer.data(), secondPartBuffer.size());
         file.close();
-        
+
 
     }
 
