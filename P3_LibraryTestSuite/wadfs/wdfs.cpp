@@ -77,6 +77,7 @@ static int do_mkdir(const char *path, mode_t mode) {
 
 static int do_mknod(const char *path, mode_t mode, dev_t rdev) {
     ((Wad*)fuse_get_context()->private_data)->createFile(path);
+    return 0;
 }
 
 static int do_write(const char *path, const char *buffer, size_t size, off_t offset, struct fuse_file_info *info) {

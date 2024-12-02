@@ -306,27 +306,32 @@ int Wad::writeToFile(const string &path, const char *buffer, int length, int off
         return 0;
     }
     else {
-        descriptorOffset += length;
+        // descriptorOffset += length;
         //Write the new file first
         file.open(filePath, std::ios::in | std::ios::binary);
         file.seekg(0, std::ios::end);
         streamsize fileSize = file.tellg();
         file.seekg(0, std::ios::beg);
-        vector<char> filePartOne(12 + offset);
-        file.read(filePartOne.data(), 12 + offset);
-        vector<char> filePartTwo(fileSize - (12 + offset));
-        file.read(filePartTwo.data(), fileSize - (12 + offset));\
+        vector<char> filePartOne(descriptorOffset);
+        file.read(filePartOne.data(), descriptorOffset);
+        vector<char> filePartTwo(fileSize - descriptorOffset);
+        file.read(filePartTwo.data(), fileSize - descriptorOffset);\
         file.close();
 
+        char offsetBuffer[offset];
+        memset(offsetBuffer, 0, offset);
         file.open(filePath, std::ios::out | std::ios::binary | ios::trunc);
         file.seekp(0, std::ios::beg);
         file.write(filePartOne.data(), filePartOne.size());
+        file.write(offsetBuffer, offset);
         file.write(buffer, length);
         file.write(filePartTwo.data(), filePartTwo.size());
         file.close();
 
         treeMap->find(path)->second.length = length;
-        treeMap->find(path)->second.offset = 12 + offset;
+        treeMap->find(path)->second.offset = descriptorOffset + offset;
+
+        descriptorOffset += length;
 
         //Write the descriptor offset
         file.open(filePath, ios::in | ios::binary);
