@@ -1,0 +1,110 @@
+.Sh Project 3 Report
+.Sh Name:
+	Project 3 – File Systems
+
+.Sh Synopsis:
+	The goal of project is implementing a WAD library to read, write WAD files and implement FUSE library to utilize WAD library to mount a WAD.
+
+.Sh Report:
+	files modified/used during project:
+.Pp
+		1) libWad/Wad.cpp and libWad/Wad.h -> Files used for WAD library
+.Pp
+		2) wadfs/wadfs.cpp -> File used for daemon library
+.Pp
+
+	How WAD files are represented in memory:
+.Pp
+1)	Struct object called tree used to represent folder/file
+.Pp
+2)	The struct object stores a folder/file’s  name, 
+    offset from beginning of lump data, length of the object, whether it’s a file/directory, 
+    and all the subdirectories/files of object.
+.Pp
+3)	In memory, WAD object is represented as map storing the path of a folder/file 
+    as key and the object’s tree struct as key
+.Pp
+4)	This representation allows to look up details regarding folder/file instantly 
+    using path provided by user and allows to modify folder/files contents 
+    easily as it is easy to access.
+.Pp
+
+Functions implemented in WAD library:
+.Pp
+1)	loadWad: Reads given WAD file and converts contents into map used by other functions.
+.Pp
+2)	getMagic(): Returns magic of WAD file.
+.Pp
+3)	isContent(): Uses path given by user to check map to identify whether it is a content. 
+    If it is, returns true. If path is invalid/not content, returns false.
+.Pp
+4)	isDirectory(): Uses path to identify whether it is a folder. If path points to folder, 
+    returns true. Else returns false.
+.Pp
+5)	createDirectory(): Uses path given by user to create new folder. 
+    Path is checked to verify whether folder is created in a namespace Directory 
+    and rewrites WAD file’s header, descriptor to represent added folder. 
+    If path is invalid such as a mapDirectory then function does nothing.
+.Pp
+6)	createFile(): Uses path given by user to create new empty file at specified position. 
+    Path checked to ensure file is being created in nameSpace directory. 
+    If path is valid then WAD header, descriptors rewritten to represent added file. 
+    If path invalid, function does nothing
+.Pp
+7)	writeToFile(): If given valid path pointing to empty file then writes contents of given buffer 
+    into end of lump data using given length. If offset is provided then data is written at 
+    offset away from end of lump data.
+.Pp
+
+What wadfs main() does:
+.Pp
+1)	Wadfs main makes sure given input is valid and passes it to FUSE.
+.Pp
+2)	Checks whether path to WAD file is an relative path. 
+    If it is then path is modified to an absolute path.
+.Pp
+3)	Main then calls FUSE main and passes it the arguments needed to run.
+.Pp
+
+Daemon leverages the Wad library by utilizing multiple functions 
+implemented in  Wad library like getDirectory, writeToFile, etc to 
+implement Daemon’s functions like getattr, mknod, etc.
+.Pp
+
+Functions implemented in daemon:
+.Pp
+1)	Getattr(): Reads every folder/file and writes attributes of each object 
+    like its file size, user permissions, etc
+.Pp
+2)	Mknod(): Creates new file in namespace directory
+.Pp
+3)	Mkdir(): Creates new folder in namespace directory
+.Pp
+4)	Read(): Reads contents of file into given buffer and returns amount of bytes read
+.Pp
+5)	Write(): Writes contents of buffer into given place of given length
+.Pp
+6)	Readdir(): Eeads every folder and lists out contained folders and files.
+.Pp
+
+.Sh Testing:
+.Pp
+
+1)  Library was tested against given library suite to ensure correct implementation.
+.Pp
+2)  Daemon tested by mounting unmodified wad file and running various commands in mounted directory.
+.Pp
+3)  commands like nano, cat used to verify file creation and whether contents being written to mounted file. 
+    Mkdir used to verify creation of directories to file. ls -l used to verify correct listing of file, 
+    directory information.
+.Pp
+4)  Modified directory was unmounted and mounted again to verify whether changes were persistent.
+
+.Sh References:
+1)	The wadfs main was written using its implementation in the discussion video
+.Pp
+2)	The FUSE functions were created using this provided  reading material: 
+    https://maastaar.net/fuse/linux/filesystem/c/2019/09/28/writing-less-simple-yet-stupid-filesystem-using-FUSE-in-C/
+.Pp
+.Sh Author:
+	Shashank Gutta
